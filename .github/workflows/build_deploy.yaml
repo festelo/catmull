@@ -1,0 +1,30 @@
+name: Build & Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "master"
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  build_deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      pages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kuhnroyal/flutter-fvm-config-action/setup@v3
+      - run: flutter pub get
+      - run: flutter build web
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: "build/web"
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
